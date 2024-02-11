@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:yes_no_app/domain/entities/message.dart';
+import 'package:yes_no_app/presentation/providers/chat_provider.dart';
 import 'package:yes_no_app/presentation/widgets/chat/her_message_bubble.dart';
 import 'package:yes_no_app/presentation/widgets/chat/my_message_bubble.dart';
 import 'package:yes_no_app/presentation/widgets/shared/message_filed_box.dart';
@@ -14,7 +17,7 @@ class ChatScreen extends StatelessWidget {
           padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
           child: CircleAvatar(
             backgroundImage: NetworkImage(
-                'https://pps.whatsapp.net/v/t61.24694-24/368260891_836866098031658_5086002646291443412_n.jpg?ccb=11-4&oh=01_AdRPFX6zNulo1_WQdPoE9lkJNC84K5anpj8oxY6otOmJeQ&oe=65207942&_nc_sid=000000&_nc_cat=106'),
+                'https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcQbHOJ4KfZILta-mI8ZaQlY8uiWZHdLqTlemYLIOe7vCGB0yO9m'),
           ),
         ),
         title: const Text('Amorcito'),
@@ -32,17 +35,26 @@ class ChatView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chatProvider = context.watch<ChatProvider>();
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Column(
           children: [
-            Expanded(child: ListView.builder(
+            Expanded(
+                child: ListView.builder(
+              controller: chatProvider.chatScrollCtrl,
+              itemCount: chatProvider.messages.length,
               itemBuilder: (context, index) {
-                return (index % 2 == 0) ? const HerMessageBubble() : const MyMessageBubble();
+                final message = chatProvider.messages[index];
+
+                return (message.fromWho == FromWho.hers)
+                    ? HerMessageBubble(message: message,)
+                    : MyMessageBubble(message: message,);
               },
             )),
-            const MessageFieldBox()
+            MessageFieldBox(onValue: chatProvider.sendMessage)
           ],
         ),
       ),
